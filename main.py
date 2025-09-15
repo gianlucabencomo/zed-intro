@@ -1,50 +1,39 @@
-import sys
+import argparse
 import pyzed.sl as sl
-from signal import signal, SIGINT
-import argparse 
-import os 
 
-cam = sl.Camera()
+def main(args):
+    zed = sl.Camera()
 
-#Handler to deal with CTRL+C properly
-def handler(signal_received, frame):
-    cam.disable_recording()
-    cam.close()
-    sys.exit(0)
+    init_params = sl.InitParameters()
+    init_params.camera_resolution = sl.RESOLUTION.HD1080
+    init_params.camera_fps = 30
+    init_params.sdk_verbose = 0
 
-signal(SIGINT, handler)
-
-def main(opt):
-
-    init = sl.InitParameters()
-    init.depth_mode = sl.DEPTH_MODE.NONE # Set configuration parameters for the ZED
-    init.async_image_retrieval = False; # This parameter can be used to record SVO in camera FPS even if the grab loop is running at a lower FPS (due to compute for ex.)
-
-    status = cam.open(init) 
-    if status != sl.ERROR_CODE.SUCCESS: 
-        print("Camera Open", status, "Exit program.")
-        exit(1)
-        
-    recording_param = sl.RecordingParameters(opt.output_svo_file, sl.SVO_COMPRESSION_MODE.H265) # Enable recording with the filename specified in argument
-    err = cam.enable_recording(recording_param)
-    if err != sl.ERROR_CODE.SUCCESS:
-        print("Recording ZED : ", err)
-        exit(1)
-
-    runtime = sl.RuntimeParameters()
-    print("SVO is Recording, use Ctrl-C to stop.") # Start recording SVO, stop with Ctrl-C command
-    frames_recorded = 0
-
-    while True:
-        if cam.grab(runtime) <= sl.ERROR_CODE.SUCCESS : # Check that a new image is successfully acquired
-            frames_recorded += 1
-            print("Frame count: " + str(frames_recorded), end="\r")
+    # Open camera
+    e = zed.open(init_params)
+    if e != sl.ERROR_CODE.SUCCESS:
+        raise ValueError(f"ZED SDK raise the following error while attempting to open the camera: {e}")
     
+    # Serial Number
+    zed_serial = zed.get_camera_information().serial_number
+    print(f"ZED Mini Serial Number: {zed_serial}")
+
+    # Calibration Parameters
+    calibration_params = zed.get_camera_information().camera_configuration.calibration_parameters
+
+    i = 0
+    image = sl.Mat()
+    runtime_parameters = sl.RuntimeParameters()
+    while i < 0:
+        if zed.grab(runtime_parameters) == sl.ERROR_CODE.SUCCESS:
+            zed.retrieve_image(image, sl.VIEW.SIDE_BY_SIDE)
+            timestamp = zed.get_timestamp(sl.TIME_REFERENCE.IMAGE)
+            print(f"Image resolution: {image.get_width()} x {image.get_height()} || Image timestamp: {timestamp.get_milliseconds()}")
+            i += 1
+
+    zed.close()
+
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--output_svo_file', type=str, help='Path to the SVO file that will be written', required= True)
-    opt = parser.parse_args()
-    if not opt.output_svo_file.endswith((".svo", ".svo2")):
-        print("--output_svo_file parameter should be a .svo file but is not : ",opt.output_svo_file,"Exit program.")
-        exit()
-    main(opt)
+    parser = argparse.ArgumentParser(description="Script to demo some of the Zed Mini features.")
+    args = parser.parse_args()
+    main(args)
