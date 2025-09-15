@@ -28,7 +28,7 @@ def main(args):
     image = sl.Mat()
     print("Press 'q' to quit")
     while True:
-        if zed.grab(runtime_params) == sl.ERROR_CODE.SUCCESS:
+        if zed.grab(runtime_parameters) == sl.ERROR_CODE.SUCCESS:
             zed.retrieve_image(image, sl.VIEW.SIDE_BY_SIDE)
             frame = image.get_data()
             cv2.imshow("ZED Live Stream", frame)
