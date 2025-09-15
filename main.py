@@ -20,3 +20,4 @@ def main(args):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Script to demo some of the Zed Mini features.")
     args = parser.parse_args()
+    main(args)
