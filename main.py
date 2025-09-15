@@ -2,6 +2,7 @@ import argparse
 import pyzed.sl as sl
 import sys
 from signal import signal, SIGINT
+import os
 
 def main(args):
     zed = sl.Camera()
@@ -25,7 +26,7 @@ def main(args):
         raise ValueError(f"ZED SDK raise the following error while attempting to open the camera: {e}")
 
     # Enable recording
-    recording_params = sl.RecordingParameters("./output.svo", sl.SVO_COMPRESSION_MODE.H264)
+    recording_params = sl.RecordingParameters(os.path.join(os.getcwd(), "output.svo"), sl.SVO_COMPRESSION_MODE.H264)
     e = zed.enable_recording(recording_params)
     if e != sl.ERROR_CODE.SUCCESS:
         raise ValueError(f"ZED SDK raise the following error while attempting to enable recording: {e}")
