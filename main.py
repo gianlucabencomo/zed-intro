@@ -31,7 +31,7 @@ def main(args):
         if zed.grab(runtime_parameters) == sl.ERROR_CODE.SUCCESS:
             zed.retrieve_image(image, sl.VIEW.SIDE_BY_SIDE)
             frame = image.get_data()
-            w, h = frame.shape[:2]
+            h, w = frame.shape[:2]
             cv2.imshow("ZED Live Stream", cv2.resize(frame, (720, int(h * (720 / w)))))
 
             if cv2.waitKey(1) & 0xFF == ord('q'):
