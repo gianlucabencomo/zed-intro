@@ -32,7 +32,7 @@ def main(args):
             zed.retrieve_image(image, sl.VIEW.SIDE_BY_SIDE)
             frame = image.get_data()
             h, w = frame.shape[:2]
-            cv2.imshow("ZED Live Stream", cv2.resize(frame, (720, int(h * (720 / w)))))
+            cv2.imshow("ZED Live Stream", cv2.resize(frame, (1080, int(h * (1080 / w)))))
 
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
