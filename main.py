@@ -1,6 +1,9 @@
 import argparse
 import pyzed.sl as sl
 
+import cv2
+import numpy as np
+
 def main(args):
     zed = sl.Camera()
 
@@ -21,16 +24,19 @@ def main(args):
     # Calibration Parameters
     calibration_params = zed.get_camera_information().camera_configuration.calibration_parameters
 
-    i = 0
-    image = sl.Mat()
     runtime_parameters = sl.RuntimeParameters()
-    while i < 0:
-        if zed.grab(runtime_parameters) == sl.ERROR_CODE.SUCCESS:
+    image = sl.Mat()
+    print("Press 'q' to quit")
+    while True:
+        if zed.grab(runtime_params) == sl.ERROR_CODE.SUCCESS:
             zed.retrieve_image(image, sl.VIEW.SIDE_BY_SIDE)
-            timestamp = zed.get_timestamp(sl.TIME_REFERENCE.IMAGE)
-            print(f"Image resolution: {image.get_width()} x {image.get_height()} || Image timestamp: {timestamp.get_milliseconds()}")
-            i += 1
+            frame = image.get_data()
+            cv2.imshow("ZED Live Stream", frame)
 
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                break
+
+    cv2.destroyAllWindows()
     zed.close()
 
 if __name__ == "__main__":
