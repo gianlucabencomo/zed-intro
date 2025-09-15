@@ -19,6 +19,7 @@ def main(args):
     init_params.camera_resolution = sl.RESOLUTION.HD1080
     init_params.camera_fps = 30
     init_params.sdk_verbose = 0
+    init.depth_mode = sl.DEPTH_MODE.NONE
 
     # Open camera
     e = zed.open(init_params)
@@ -26,9 +27,7 @@ def main(args):
         raise ValueError(f"ZED SDK raise the following error while attempting to open the camera: {e}")
 
     # Enable recording
-    recording_params = sl.RecordingParameters()
-    recording_params.compression_mode = sl.SVO_COMPRESSION_MODE.H264
-    recording_params.video_filename = sys.argv[0]
+    recording_params = sl.RecordingParameters(os.path.join(os.getcwd(), "output.svo"), sl.SVO_COMPRESSION_MODE.H264)
     e = zed.enable_recording(recording_params)
     if e != sl.ERROR_CODE.SUCCESS:
         raise ValueError(f"ZED SDK raise the following error while attempting to enable recording: {e}")
